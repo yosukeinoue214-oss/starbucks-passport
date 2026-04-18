@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>スタバアプリ 自動アップロード</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, sans-serif; background:#F2F0EB; min-height:100vh;
+    display:flex; align-items:center; justify-content:center; padding:20px; }
+  .card { background:#fff; border-radius:16px; padding:32px 28px; max-width:440px;
+    width:100%; box-shadow:0 4px 24px rgba(0,0,0,0.08); }
+  .logo { width:52px; height:52px; background:#1E3932; border-radius:12px;
+    display:flex; align-items:center; justify-content:center; margin-bottom:20px; }
+  .logo svg { width:30px; height:30px; }
+  h1 { font-size:20px; font-weight:700; color:#1A1A1A; margin-bottom:6px; }
+  p { font-size:13px; color:#7A7568; line-height:1.6; margin-bottom:24px; }
+  label { font-size:12px; font-weight:700; color:#1A1A1A; letter-spacing:0.05em;
+    display:block; margin-bottom:6px; }
+  input[type=text], input[type=password] {
+    width:100%; padding:12px 14px; border:1.5px solid #E8E4DC;
+    border-radius:8px; font-size:14px; margin-bottom:16px;
+    font-family:-apple-system,sans-serif; outline:none; transition:border 0.15s; }
+  input:focus { border-color:#00704A; }
+  .file-zone { border:2px dashed #D4D0C8; border-radius:8px; padding:24px;
+    text-align:center; margin-bottom:16px; cursor:pointer; transition:all 0.15s; }
+  .file-zone:hover, .file-zone.drag { border-color:#00704A; background:#F0FAF5; }
+  .file-zone input { display:none; }
+  .file-zone-text { font-size:13px; color:#7A7568; }
+  .file-zone-name { font-size:13px; font-weight:700; color:#00704A; margin-top:6px; }
+  .btn { width:100%; padding:14px; background:#1E3932; color:#fff; border:none;
+    border-radius:8px; font-size:15px; font-weight:700; cursor:pointer;
+    font-family:-apple-system,sans-serif; transition:opacity 0.15s; }
+  .btn:hover { opacity:0.88; }
+  .btn:disabled { opacity:0.4; cursor:not-allowed; }
+  .status { margin-top:16px; padding:12px 16px; border-radius:8px;
+    font-size:13px; display:none; }
+  .status.loading { background:#FFF8E1; color:#B8860B; display:block; }
+  .status.success { background:#E8F5E9; color:#2E7D32; display:block; }
+  .status.error { background:#FFEBEE; color:#C62828; display:block; }
+  .save-hint { font-size:11px; color:#B0AA9E; margin-top:12px; text-align:center; }
+  .token-saved { font-size:11px; color:#00704A; margin-bottom:4px; display:none; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 8v8M8 12l4-4 4 4"/>
+    </svg>
+  </div>
+  <h1>スタバアプリ 自動アップロード</h1>
+  <p>新しい starbucks_app.html をGitHubに自動でアップロードします。</p>
+
+  <label>GitHub Personal Access Token</label>
+  <div class="token-saved" id="token-saved">✅ 前回のトークンが保存されています</div>
+  <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+
+  <label>ファイルを選択</label>
+  <div class="file-zone" id="file-zone" onclick="document.getElementById('file-input').click()">
+    <input type="file" id="file-input" accept=".html">
+    <div class="file-zone-text">📂 タップしてファイルを選択</div>
+    <div class="file-zone-name" id="file-name"></div>
+  </div>
+
+  <button class="btn" id="upload-btn" onclick="upload()" disabled>
+    GitHubにアップロード ↑
+  </button>
+
+  <div class="status" id="status"></div>
+  <div class="save-hint">トークンはこのブラウザに安全に保存されます</div>
+</div>
+
+<script>
+const OWNER = 'yosukeinoue214-oss';
+const REPO  = 'starbucks-passport';
+const FILE  = 'starbucks_app.html';
+
+// Load saved token
+const saved = localStorage.getItem('gh_token');
+if (saved) {
+  document.getElementById('token').value = saved;
+  document.getElementById('token-saved').style.display = 'block';
+}
+
+let fileContent = null;
+
+document.getElementById('file-input').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  document.getElementById('file-name').textContent = '✅ ' + file.name;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    fileContent = ev.target.result;
+    checkReady();
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+document.getElementById('token').addEventListener('input', checkReady);
+
+function checkReady() {
+  const token = document.getElementById('token').value.trim();
+  document.getElementById('upload-btn').disabled = !(token && fileContent);
+}
+
+async function upload() {
+  const token = document.getElementById('token').value.trim();
+  localStorage.setItem('gh_token', token);
+
+  const btn = document.getElementById('upload-btn');
+  const status = document.getElementById('status');
+  btn.disabled = true;
+  status.className = 'status loading';
+  status.textContent = '⏳ アップロード中...';
+
+  try {
+    // Get current SHA
+    const getRes = await fetch(
+      `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`,
+      { headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' } }
+    );
+    if (!getRes.ok) throw new Error('ファイル情報の取得に失敗しました（トークンを確認してください）');
+    const getData = await getRes.json();
+    const sha = getData.sha;
+
+    // Encode content
+    const bytes = new Uint8Array(fileContent);
+    let binary = '';
+    bytes.forEach(b => binary += String.fromCharCode(b));
+    const encoded = btoa(binary);
+
+    // Push update
+    const putRes = await fetch(
+      `https://api.github.com/repos/${OWNER}/${REPO}/contents/${FILE}`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `token ${token}`,
+          Accept: 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: `Update starbucks app - ${new Date().toLocaleDateString('ja-JP')}`,
+          content: encoded,
+          sha: sha
+        })
+      }
+    );
+    if (!putRes.ok) throw new Error('アップロードに失敗しました');
+
+    status.className = 'status success';
+    status.textContent = '🎉 アップロード完了！1〜2分後にアプリに反映されます。';
+  } catch(e) {
+    status.className = 'status error';
+    status.textContent = '❌ エラー: ' + e.message;
+  }
+  btn.disabled = false;
+}
+
+// Drag and drop
+const zone = document.getElementById('file-zone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+zone.addEventListener('drop', e => {
+  e.preventDefault();
+  zone.classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  document.getElementById('file-name').textContent = '✅ ' + file.name;
+  const reader = new FileReader();
+  reader.onload = ev => { fileContent = ev.target.result; checkReady(); };
+  reader.readAsArrayBuffer(file);
+});
+</script>
+</body>
+</html>
