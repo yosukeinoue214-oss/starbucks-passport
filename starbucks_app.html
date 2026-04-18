@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1E3932">
+<title>スタバ全店攻略</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+JP:wght@300;400;700&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #1E3932;
+  --mid: #00704A;
+  --gold: #CBA258;
+  --cream: #F2F0EB;
+  --ink: #1A1A1A;
+  --muted: #7A7568;
+  --card: #fff;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; overflow:hidden; background:var(--cream); font-family:'Noto Sans JP',sans-serif; }
+
+/* ── NAV BAR ── */
+.nav { position:fixed; bottom:0; left:0; right:0; z-index:100;
+  background:var(--green); display:flex; padding-bottom:var(--safe-bottom);
+  border-top:1px solid rgba(255,255,255,0.1); }
+.nav-btn { flex:1; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; padding:10px 0 8px; gap:4px; border:none;
+  background:none; cursor:pointer; color:rgba(255,255,255,0.45);
+  font-family:'Noto Sans JP',sans-serif; font-size:10px; letter-spacing:0.05em;
+  transition:color 0.15s; }
+.nav-btn svg { width:22px; height:22px; }
+.nav-btn.active { color:var(--gold); }
+
+/* ── PAGES ── */
+.page { position:fixed; inset:0; bottom:calc(56px + var(--safe-bottom));
+  overflow-y:auto; -webkit-overflow-scrolling:touch;
+  opacity:0; pointer-events:none; transition:opacity 0.2s; }
+.page.active { opacity:1; pointer-events:auto; }
+
+/* ── HEADER ── */
+.page-header { background:var(--green); padding:52px 20px 20px; position:relative; overflow:hidden; }
+.page-header::after { content:''; position:absolute; right:-40px; top:-40px;
+  width:200px; height:200px; border:30px solid rgba(255,255,255,0.04); border-radius:50%; }
+.page-header-label { font-size:10px; letter-spacing:0.25em; color:var(--gold);
+  text-transform:uppercase; margin-bottom:4px; }
+.page-header-title { font-family:'Bebas Neue',sans-serif; font-size:36px;
+  color:#fff; letter-spacing:0.06em; line-height:1; }
+
+/* ── DASHBOARD PAGE ── */
+.dash-body { padding:16px; display:flex; flex-direction:column; gap:14px; padding-bottom:16px; }
+
+.hero-cards { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.hero-card { background:var(--green); border-radius:8px; padding:16px;
+  color:#fff; position:relative; overflow:hidden; }
+.hero-card::after { content:''; position:absolute; right:-20px; bottom:-20px;
+  width:80px; height:80px; background:rgba(255,255,255,0.04); border-radius:50%; }
+.hero-card-label { font-size:9px; letter-spacing:0.2em; color:rgba(255,255,255,0.5);
+  text-transform:uppercase; margin-bottom:6px; }
+.hero-card-num { font-family:'Bebas Neue',sans-serif; font-size:42px;
+  line-height:1; color:#fff; letter-spacing:0.02em; }
+.hero-card-num span { font-size:0.45em; color:var(--gold); letter-spacing:0.1em; }
+.hero-card-sub { font-size:10px; color:rgba(255,255,255,0.4); margin-top:4px; }
+
+.card { background:var(--card); border-radius:8px; padding:16px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.06); }
+.card-label { font-size:9px; letter-spacing:0.2em; text-transform:uppercase;
+  color:var(--muted); font-weight:700; margin-bottom:12px; }
+
+/* Progress */
+.prog-bar-wrap { background:#EEECE7; border-radius:3px; height:8px; overflow:hidden; margin-bottom:8px; }
+.prog-bar-fill { height:100%; background:linear-gradient(90deg,var(--mid),var(--gold));
+  border-radius:3px; transition:width 1.2s cubic-bezier(.4,0,.2,1); width:0; }
+.prog-labels { display:flex; justify-content:space-between; font-size:11px;
+  color:var(--muted); font-family:'Space Mono',monospace; }
+
+/* Ring */
+.ring-row { display:flex; align-items:center; gap:16px; }
+.ring-wrap { position:relative; width:80px; height:80px; flex-shrink:0; }
+.ring-wrap svg { transform:rotate(-90deg); }
+.ring-center { position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; }
+.ring-pct { font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--green); line-height:1; }
+.ring-pct-sub { font-size:8px; color:var(--muted); letter-spacing:0.1em; }
+.ring-info { flex:1; }
+.ring-info-title { font-size:13px; font-weight:700; margin-bottom:4px; }
+.ring-info-sub { font-size:11px; color:var(--muted); line-height:1.6; }
+
+/* Pref list */
+.pref-item { display:grid; grid-template-columns:56px 1fr 44px; align-items:center;
+  gap:8px; padding:6px 0; border-bottom:1px solid #F5F3EF; }
+.pref-item:last-child { border-bottom:none; }
+.pref-name { font-size:12px; font-weight:700; }
+.pref-bar-wrap { background:#EEECE7; border-radius:2px; height:5px; overflow:hidden; }
+.pref-bar { height:100%; border-radius:2px; transition:width 1s; width:0; }
+.pref-cnt { font-family:'Space Mono',monospace; font-size:10px; color:var(--muted); text-align:right; }
+
+/* Recent */
+.recent-item { display:flex; align-items:center; gap:10px; padding:9px 0;
+  border-bottom:1px solid #F5F3EF; }
+.recent-item:last-child { border-bottom:none; }
+.recent-num { font-family:'Space Mono',monospace; font-size:10px; color:var(--muted); width:24px; text-align:right; }
+.recent-name { flex:1; font-size:12px; font-weight:700; }
+.recent-pref { font-size:10px; color:var(--muted); background:#F0EDE8;
+  padding:2px 6px; border-radius:2px; white-space:nowrap; }
+
+/* ── NEARBY PAGE ── */
+.nearby-body { padding:16px; display:flex; flex-direction:column; gap:14px; }
+.location-btn { width:100%; background:var(--mid); color:#fff; border:none;
+  border-radius:8px; padding:14px; font-family:'Noto Sans JP',sans-serif;
+  font-size:14px; font-weight:700; cursor:pointer; display:flex;
+  align-items:center; justify-content:center; gap:8px; letter-spacing:0.05em; }
+.location-btn:active { opacity:0.85; }
+.location-btn svg { width:18px; height:18px; }
+
+.nearby-status { text-align:center; font-size:12px; color:var(--muted);
+  padding:8px; background:var(--card); border-radius:8px; }
+
+.nearby-list { display:flex; flex-direction:column; gap:0; }
+.nearby-item { background:var(--card); border-radius:8px; padding:14px 16px;
+  margin-bottom:8px; display:flex; align-items:center; gap:12px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.06); cursor:pointer;
+  transition:transform 0.1s; }
+.nearby-item:active { transform:scale(0.98); }
+.nearby-dist { font-family:'Bebas Neue',sans-serif; font-size:28px;
+  color:var(--mid); line-height:1; min-width:54px; text-align:center; }
+.nearby-dist span { font-family:'Noto Sans JP',sans-serif; font-size:10px;
+  color:var(--muted); font-weight:300; display:block; }
+.nearby-info { flex:1; }
+.nearby-name { font-size:13px; font-weight:700; margin-bottom:3px; line-height:1.3; }
+.nearby-pref { font-size:10px; color:var(--muted); }
+.nearby-stamp { width:28px; height:28px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:14px; }
+.nearby-stamp.yes { background:#E8F5E9; }
+.nearby-stamp.no { background:#EEECE7; }
+
+.filter-row { display:flex; gap:8px; }
+.filter-btn { flex:1; padding:8px; border-radius:6px; border:1px solid #EEECE7;
+  background:var(--card); font-family:'Noto Sans JP',sans-serif; font-size:11px;
+  cursor:pointer; color:var(--muted); transition:all 0.15s; }
+.filter-btn.active { background:var(--green); color:#fff; border-color:var(--green); }
+
+/* map mini */
+#mini-map { width:100%; height:220px; border-radius:8px; overflow:hidden;
+  background:#E8E4DC; position:relative; }
+#mini-map iframe { width:100%; height:100%; border:none; }
+.map-placeholder { width:100%; height:100%; display:flex; align-items:center;
+  justify-content:center; flex-direction:column; gap:8px; color:var(--muted); font-size:12px; }
+
+/* ── PREF MAP PAGE ── */
+.map-body { padding:16px; }
+.pref-map-svg { width:100%; height:auto; }
+
+/* tooltip */
+.tooltip { position:fixed; background:var(--green); color:#fff; padding:8px 12px;
+  border-radius:4px; font-size:12px; pointer-events:none; z-index:999;
+  line-height:1.6; display:none; box-shadow:0 4px 12px rgba(0,0,0,0.2); }
+
+/* Animate in */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(12px); }
+  to { opacity:1; transform:translateY(0); }
+}
+.animate { opacity:0; animation:fadeUp 0.5s ease forwards; }
+.d1 { animation-delay:0.05s; }
+.d2 { animation-delay:0.1s; }
+.d3 { animation-delay:0.15s; }
+.d4 { animation-delay:0.2s; }
+.d5 { animation-delay:0.25s; }
+</style>
+</head>
+<body>
+
+<!-- ══ PAGE 1: DASHBOARD ══ -->
+<div class="page active" id="page-dash">
+  <div class="page-header">
+    <div class="page-header-label">MY STORE PASSPORT</div>
+    <div class="page-header-title">攻略ダッシュボード</div>
+  </div>
+  <div class="dash-body">
+
+    <!-- Hero cards -->
+    <div class="hero-cards animate d1">
+      <div class="hero-card">
+        <div class="hero-card-label">取得済み</div>
+        <div class="hero-card-num">582<span>店</span></div>
+        <div class="hero-card-sub">stamped</div>
+      </div>
+      <div class="hero-card">
+        <div class="hero-card-label">残り</div>
+        <div class="hero-card-num" id="remaining">1495<span>店</span></div>
+        <div class="hero-card-sub">remaining</div>
+      </div>
+    </div>
+
+    <!-- Progress + ring -->
+    <div class="card animate d2">
+      <div class="card-label">全体進捗</div>
+      <div class="ring-row">
+        <div class="ring-wrap">
+          <svg width="80" height="80" viewBox="0 0 80 80">
+            <circle cx="40" cy="40" r="32" fill="none" stroke="#EEECE7" stroke-width="6"/>
+            <circle id="ring-fill" cx="40" cy="40" r="32" fill="none"
+              stroke="#CBA258" stroke-width="6" stroke-linecap="round"
+              stroke-dasharray="201" stroke-dashoffset="201"/>
+          </svg>
+          <div class="ring-center">
+            <div class="ring-pct" id="ring-pct">0%</div>
+            <div class="ring-pct-sub">完了</div>
+          </div>
+        </div>
+        <div class="ring-info">
+          <div class="ring-info-title">582 / 2077 店舗</div>
+          <div class="ring-info-sub">全国2077店舗に対する<br>達成率</div>
+          <div class="prog-bar-wrap" style="margin-top:10px">
+            <div class="prog-bar-fill" id="prog-fill"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top prefs -->
+    <div class="card animate d3">
+      <div class="card-label">都道府県別 Top 8</div>
+      <div id="pref-list"></div>
+    </div>
+
+    <!-- Recent -->
+    <div class="card animate d4">
+      <div class="card-label">最近の取得（最新15件）</div>
+      <div id="recent-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ PAGE 2: NEARBY ══ -->
+<div class="page" id="page-near">
+  <div class="page-header">
+    <div class="page-header-label">FIND STORES</div>
+    <div class="page-header-title">近くのスタバ</div>
+  </div>
+  <div class="nearby-body">
+    <button class="location-btn" id="locate-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+        <circle cx="12" cy="12" r="8" stroke-dasharray="4 2"/>
+      </svg>
+      現在地を取得して探す
+    </button>
+    <div class="filter-row">
+      <button class="filter-btn active" id="filter-all" onclick="setFilter('all')">すべて</button>
+      <button class="filter-btn" id="filter-no" onclick="setFilter('no')">未取得のみ</button>
+      <button class="filter-btn" id="filter-yes" onclick="setFilter('yes')">取得済みのみ</button>
+    </div>
+    <div class="nearby-status" id="nearby-status">現在地を取得してください</div>
+    <div id="nearby-list"></div>
+  </div>
+</div>
+
+<!-- ══ PAGE 3: MAP ══ -->
+<div class="page" id="page-map">
+  <div class="page-header">
+    <div class="page-header-label">ACHIEVEMENT MAP</div>
+    <div class="page-header-title">都道府県マップ</div>
+  </div>
+  <div class="map-body">
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-label">達成率凡例</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
+        <span style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#00704A;border-radius:1px;display:inline-block"></span>70%+</span>
+        <span style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#5BA08A;border-radius:1px;display:inline-block"></span>50-69%</span>
+        <span style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#CBA258;border-radius:1px;display:inline-block"></span>30-49%</span>
+        <span style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#D4956A;border-radius:1px;display:inline-block"></span>10-29%</span>
+        <span style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#E8E4DC;border-radius:1px;display:inline-block"></span>0-9%</span>
+      </div>
+    </div>
+    <svg id="pref-map" viewBox="0 0 400 460" style="width:100%;height:auto;display:block"></svg>
+  </div>
+  <div class="tooltip" id="tooltip"></div>
+</div>
+
+<!-- ══ BOTTOM NAV ══ -->
+<nav class="nav">
+  <button class="nav-btn active" id="nav-dash" onclick="showPage('dash')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+      <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+    </svg>
+    ダッシュボード
+  </button>
+  <button class="nav-btn" id="nav-near" onclick="showPage('near')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+      <circle cx="12" cy="9" r="2.5"/>
+    </svg>
+    近くを探す
+  </button>
+  <button class="nav-btn" id="nav-map" onclick="showPage('map')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <polygon points="1,6 1,22 8,18 16,22 23,18 23,2 16,6 8,2"/>
+      <line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>
+    </svg>
+    マップ
+  </button>
+</nav>
+
+<script>
+const TOTAL = 582;
+const TOTAL_JP = 2077;
+
+// ── DATA ──
+const prefData=[
+  {pref:"北海道",s:13,t:53,pct:25,r:"hokkaido"},
+  {pref:"青森",s:1,t:11,pct:9,r:"tohoku"},
+  {pref:"岩手",s:2,t:9,pct:22,r:"tohoku"},
+  {pref:"宮城",s:3,t:31,pct:10,r:"tohoku"},
+  {pref:"秋田",s:3,t:9,pct:33,r:"tohoku"},
+  {pref:"山形",s:1,t:9,pct:11,r:"tohoku"},
+  {pref:"福島",s:2,t:17,pct:12,r:"tohoku"},
+  {pref:"茨城",s:1,t:42,pct:2,r:"kanto"},
+  {pref:"栃木",s:2,t:35,pct:6,r:"kanto"},
+  {pref:"群馬",s:3,t:27,pct:11,r:"kanto"},
+  {pref:"埼玉",s:21,t:93,pct:23,r:"kanto"},
+  {pref:"千葉",s:34,t:89,pct:38,r:"kanto"},
+  {pref:"東京",s:360,t:407,pct:88,r:"kanto"},
+  {pref:"神奈川",s:55,t:138,pct:40,r:"kanto"},
+  {pref:"新潟",s:3,t:24,pct:12,r:"chubu"},
+  {pref:"富山",s:3,t:13,pct:23,r:"chubu"},
+  {pref:"石川",s:7,t:18,pct:39,r:"chubu"},
+  {pref:"福井",s:1,t:11,pct:9,r:"chubu"},
+  {pref:"山梨",s:1,t:13,pct:8,r:"chubu"},
+  {pref:"長野",s:1,t:29,pct:3,r:"chubu"},
+  {pref:"静岡",s:5,t:51,pct:10,r:"chubu"},
+  {pref:"愛知",s:7,t:155,pct:5,r:"chubu"},
+  {pref:"三重",s:1,t:27,pct:4,r:"chubu"},
+  {pref:"滋賀",s:0,t:19,pct:0,r:"kinki"},
+  {pref:"京都",s:4,t:44,pct:9,r:"kinki"},
+  {pref:"大阪",s:14,t:155,pct:9,r:"kinki"},
+  {pref:"兵庫",s:1,t:68,pct:1,r:"kinki"},
+  {pref:"奈良",s:0,t:20,pct:0,r:"kinki"},
+  {pref:"和歌山",s:1,t:11,pct:9,r:"kinki"},
+  {pref:"鳥取",s:0,t:5,pct:0,r:"chugoku"},
+  {pref:"島根",s:0,t:5,pct:0,r:"chugoku"},
+  {pref:"岡山",s:0,t:23,pct:0,r:"chugoku"},
+  {pref:"広島",s:5,t:37,pct:14,r:"chugoku"},
+  {pref:"山口",s:1,t:10,pct:10,r:"chugoku"},
+  {pref:"徳島",s:0,t:6,pct:0,r:"chugoku"},
+  {pref:"香川",s:0,t:17,pct:0,r:"chugoku"},
+  {pref:"愛媛",s:0,t:15,pct:0,r:"chugoku"},
+  {pref:"高知",s:0,t:7,pct:0,r:"chugoku"},
+  {pref:"福岡",s:18,t:83,pct:22,r:"kyushu"},
+  {pref:"佐賀",s:2,t:12,pct:17,r:"kyushu"},
+  {pref:"長崎",s:3,t:14,pct:21,r:"kyushu"},
+  {pref:"熊本",s:1,t:21,pct:5,r:"kyushu"},
+  {pref:"大分",s:1,t:16,pct:6,r:"kyushu"},
+  {pref:"宮崎",s:0,t:14,pct:0,r:"kyushu"},
+  {pref:"鹿児島",s:0,t:13,pct:0,r:"kyushu"},
+  {pref:"沖縄",s:1,t:32,pct:3,r:"kyushu"}
+];
+
+const stores=[
+  {n:"ここのススキノ店",p:"北海道",lat:43.10183,lng:141.20750,s:true},
+  {n:"さつきた8・1店",p:"北海道",lat:42.99251,lng:141.26696,s:true},
+  {n:"大同生命札幌ビル ミレド2階店",p:"北海道",lat:43.13094,lng:141.40301,s:true},
+  {n:"大同生命札幌ビル ミレド地下1階店",p:"北海道",lat:43.17765,lng:141.22608,s:true},
+  {n:"新千歳空港店",p:"北海道",lat:43.03658,lng:141.20894,s:true},
+  {n:"札幌4丁目プレイス店",p:"北海道",lat:42.97559,lng:141.35161,s:true},
+  {n:"札幌アピア店",p:"北海道",lat:42.91796,lng:141.25965,s:true},
+  {n:"札幌グランドホテル店",p:"北海道",lat:43.10497,lng:141.36348,s:true},
+  {n:"札幌ステラプレイス イースト2階店",p:"北海道",lat:42.97613,lng:141.37678,s:true},
+  {n:"札幌ステラプレイス センター1階店",p:"北海道",lat:43.15283,lng:141.20195,s:true},
+  {n:"札幌パルコ店",p:"北海道",lat:43.15175,lng:141.40944,s:true},
+  {n:"札幌南一条店",p:"北海道",lat:43.01208,lng:141.24664,s:true},
+  {n:"札幌紀伊國屋書店",p:"北海道",lat:43.19716,lng:141.30098,s:true},
+  {n:"青森ラビナ店",p:"青森",lat:40.69782,lng:140.61901,s:true},
+  {n:"盛岡フェザン店",p:"岩手",lat:39.80425,lng:141.18112,s:true},
+  {n:"盛岡菜園店",p:"岩手",lat:39.79214,lng:141.21892,s:true},
+  {n:"エスパル仙台本館店",p:"宮城",lat:38.28087,lng:141.01193,s:true},
+  {n:"エスパル仙台東館店",p:"宮城",lat:38.23356,lng:140.88561,s:true},
+  {n:"仙台南町通り店",p:"宮城",lat:38.36882,lng:140.90556,s:true},
+  {n:"イオンタウン能代店",p:"秋田",lat:39.82851,lng:140.12321,s:true},
+  {n:"秋田アルス店",p:"秋田",lat:39.78137,lng:139.96375,s:true},
+  {n:"秋田駅店",p:"秋田",lat:39.63837,lng:140.03682,s:true},
+  {n:"山形エスパル店",p:"山形",lat:38.11394,lng:140.27984,s:true},
+  {n:"郡山モルティ店",p:"福島",lat:37.63030,lng:140.40339,s:true},
+  {n:"郡山駅店",p:"福島",lat:37.79071,lng:140.42945,s:true},
+  {n:"つくば駅店",p:"茨城",lat:36.30105,lng:140.36285,s:true},
+  {n:"ヴァル小山店",p:"栃木",lat:36.50009,lng:140.01100,s:true},
+  {n:"宇都宮パセオ店",p:"栃木",lat:36.61441,lng:139.91274,s:true},
+  {n:"イーサイト高崎店",p:"群馬",lat:36.29134,lng:139.12874,s:true},
+  {n:"高崎オーパ店",p:"群馬",lat:36.28902,lng:139.02384,s:true},
+  {n:"高崎駅ビル モントレー店",p:"群馬",lat:36.53686,lng:139.10200,s:true},
+  {n:"さいたま新都心 コクーンシティ コクーン2店",p:"埼玉",lat:35.87708,lng:139.70538,s:true},
+  {n:"さいたま新都心 コクーンシティコクーン1店",p:"埼玉",lat:35.96286,lng:139.73280,s:true},
+  {n:"さいたま新都心店",p:"埼玉",lat:35.77871,lng:139.50963,s:true},
+  {n:"ららぼーと新三郷店",p:"埼玉",lat:35.80464,lng:139.58032,s:true},
+  {n:"エキア越谷店",p:"埼玉",lat:35.77329,lng:139.78287,s:true},
+  {n:"エキュート大宮ノース店",p:"埼玉",lat:35.97291,lng:139.59440,s:true},
+  {n:"ルミネ大宮 LUMINE1店",p:"埼玉",lat:35.90663,lng:139.61869,s:true},
+  {n:"ルミネ大宮 LUMINE2店",p:"埼玉",lat:35.98436,lng:139.63766,s:true},
+  {n:"上尾サービスエリア(下り線)店",p:"埼玉",lat:35.78946,lng:139.57399,s:true},
+  {n:"上尾壱丁目店",p:"埼玉",lat:35.87841,lng:139.57882,s:true},
+  {n:"大宮マルイ店",p:"埼玉",lat:35.88538,lng:139.76935,s:true},
+  {n:"大宮西口店",p:"埼玉",lat:35.82982,lng:139.56580,s:true},
+  {n:"東武新越谷駅店",p:"埼玉",lat:36.00926,lng:139.65286,s:true},
+  {n:"武蔵浦和BEANS店",p:"埼玉",lat:35.73727,lng:139.51413,s:true},
+  {n:"獨協医科大学埼玉医療センター店",p:"埼玉",lat:35.74289,lng:139.68823,s:true},
+  {n:"草加ヴァリエ店",p:"埼玉",lat:35.94762,lng:139.62665,s:true},
+  {n:"越谷イオンレイクタウン kaze 1階店",p:"埼玉",lat:35.72906,lng:139.61449,s:true},
+  {n:"越谷イオンレイクタウン kaze 2階カフェプラザ店",p:"埼玉",lat:36.00884,lng:139.65873,s:true},
+  {n:"越谷イオンレイクタウン kaze 2階レイクタウンゲート店",p:"埼玉",lat:36.00132,lng:139.75823,s:true},
+  {n:"越谷イオンレイクタウン mori ガーデンウォーク店",p:"埼玉",lat:35.71344,lng:139.71622,s:true},
+  {n:"越谷レイクタウン アウトレット店",p:"埼玉",lat:35.91451,lng:139.66109,s:true},
+  {n:"JR柏駅 中央改札内店",p:"千葉",lat:35.54005,lng:140.16229,s:true},
+  {n:"MONA新浦安店",p:"千葉",lat:35.49347,lng:140.10043,s:true},
+  {n:"アトレ新浦安店",p:"千葉",lat:35.59612,lng:140.25614,s:true},
+  {n:"イオンモール津田沼 North店",p:"千葉",lat:35.72276,lng:140.04902,s:true},
+  {n:"イオン市川妙典店",p:"千葉",lat:35.61018,lng:140.02360,s:true},
+  {n:"イオン海浜幕張店",p:"千葉",lat:35.73379,lng:140.23116,s:true},
+  {n:"シャポー市川店",p:"千葉",lat:35.54953,lng:140.16168,s:true},
+  {n:"シャポー船橋南館店",p:"千葉",lat:35.64269,lng:140.01585,s:true},
+  {n:"シャポー船橋本館店",p:"千葉",lat:35.68875,lng:140.13181,s:true},
+  {n:"ブラーレ松戸店",p:"千葉",lat:35.69359,lng:140.12911,s:true},
+  {n:"ベリエ海浜幕張店",p:"千葉",lat:35.46017,lng:140.06725,s:true},
+  {n:"ペリエ千葉5階店",p:"千葉",lat:35.46584,lng:140.24873,s:true},
+  {n:"ペリエ千葉店",p:"千葉",lat:35.72362,lng:140.21950,s:true},
+  {n:"ペリエ西千葉店",p:"千葉",lat:35.55225,lng:139.98738,s:true},
+  {n:"ミーナ津田沼店",p:"千葉",lat:35.72340,lng:140.25408,s:true},
+  {n:"ヨドバシ千葉店",p:"千葉",lat:35.48570,lng:140.11580,s:true},
+  {n:"千葉センシティタワー店",p:"千葉",lat:35.48076,lng:140.19818,s:true},
+  {n:"千葉中央駅店",p:"千葉",lat:35.68975,lng:140.00852,s:true},
+  {n:"千葉公園店",p:"千葉",lat:35.60258,lng:140.13494,s:true},
+  {n:"幕張WBG店",p:"千葉",lat:35.53952,lng:140.23173,s:true},
+  {n:"成田空港第1ターミナル店",p:"千葉",lat:35.58694,lng:140.03354,s:true},
+  {n:"成田空港第1ターミナル第2サテライト店",p:"千葉",lat:35.62179,lng:140.18898,s:true},
+  {n:"成田空港第2ターミナル別棟ロビー北店",p:"千葉",lat:35.52035,lng:140.06351,s:true},
+  {n:"成田空港第2ターミナル別棟ロビー南店",p:"千葉",lat:35.75854,lng:140.16496,s:true},
+  {n:"成田空港第2ターミナル店",p:"千葉",lat:35.59143,lng:140.12527,s:true},
+  {n:"柏高島屋ステーションモール6階店",p:"千葉",lat:35.49630,lng:140.03741,s:true},
+  {n:"津田沼ビート店",p:"千葉",lat:35.56143,lng:140.14649,s:true},
+  {n:"流山おおたかの森S.C.店",p:"千葉",lat:35.52903,lng:140.03607,s:true},
+  {n:"舞浜 イクスピアリ店",p:"千葉",lat:35.48130,lng:140.15933,s:true},
+  {n:"舞浜イクスピアリ2Fトレイダーズ・パッセージ店",p:"千葉",lat:35.52868,lng:140.24163,s:true},
+  {n:"舞浜駅店",p:"千葉",lat:35.71789,lng:139.99126,s:true},
+  {n:"船橋東武店",p:"千葉",lat:35.53140,lng:140.17069,s:true},
+  {n:"船橋高架下ステーションモール店",p:"千葉",lat:35.52427,lng:140.00969,s:true},
+  {n:"西船橋メトロピア店",p:"千葉",lat:35.74065,lng:140.14131,s:true},
+  {n:"CIRCLES銀座店",p:"東京",lat:35.68180,lng:139.77539,s:true},
+  {n:"GINZA SIX店",p:"東京",lat:35.78225,lng:139.59712,s:true},
+  {n:"JR上野駅 入谷改札前店",p:"東京",lat:35.56908,lng:139.66932,s:true},
+  {n:"JR新橋 銀座口店",p:"東京",lat:35.66707,lng:139.68011,s:true},
+  {n:"JR新橋駅 汐留改札内店",p:"東京",lat:35.75872,lng:139.74201,s:true},
+  {n:"JR有楽町駅京橋口店",p:"東京",lat:35.83525,lng:139.56953,s:true},
+  {n:"JR東京駅日本橋口店",p:"東京",lat:35.66079,lng:139.64179,s:true},
+  {n:"JR東日本ホテルメッツ プレミア 秋葉原店",p:"東京",lat:35.79850,lng:139.61460,s:true},
+  {n:"JR東日本ホテルメッツ 目白店",p:"東京",lat:35.59706,lng:139.67458,s:true},
+  {n:"JR東海 品川駅店",p:"東京",lat:35.66656,lng:139.62356,s:true},
+  {n:"JR東海 東京駅新幹線ラチ内店",p:"東京",lat:35.61494,lng:139.81698,s:true},
+  {n:"JR池袋駅 西口店",p:"東京",lat:35.67294,lng:139.79840,s:true},
+  {n:"KDDI大手町ビル店",p:"東京",lat:35.70510,lng:139.55518,s:true},
+  {n:"KITTE丸の内店",p:"東京",lat:35.83978,lng:139.79081,s:true},
+  {n:"LaLaテラス南千住店",p:"東京",lat:35.83070,lng:139.81791,s:true},
+  {n:"MIYASHITA PARK店",p:"東京",lat:35.79461,lng:139.58989,s:true},
+  {n:"Olive LOUNGE 下高井戸店",p:"東京",lat:35.68569,lng:139.60412,s:true},
+  {n:"Olive LOUNGE 新宿店",p:"東京",lat:35.66031,lng:139.55759,s:true},
+  {n:"Olive LOUNGE 新宿通店",p:"東京",lat:35.65369,lng:139.83559,s:true},
+  {n:"Olive LOUNGE 渋谷店",p:"東京",lat:35.61956,lng:139.77522,s:true},
+  {n:"Olive LOUNGE 西新宿店",p:"東京",lat:35.67650,lng:139.66690,s:true},
+  {n:"Olive LOUNGE 都立大学駅前店",p:"東京",lat:35.82720,lng:139.83863,s:true},
+  {n:"Olive LOUNGE 高円寺店",p:"東京",lat:35.70673,lng:139.75552,s:true},
+  {n:"SHIBUYA TSUTAYA 2F店",p:"東京",lat:35.58644,lng:139.62901,s:true},
+  {n:"TSUTAYA BOOKSTORE MARUNOUCHI店",p:"東京",lat:35.83061,lng:139.71375,s:true},
+  {n:"TSUTAYA BOOKSTORE 東京店",p:"東京",lat:35.70266,lng:139.76439,s:true},
+  {n:"TSUTAYA BOOKSTORE大井町トラックス店",p:"東京",lat:35.55715,lng:139.71525,s:true},
+  {n:"TSUTAYA 大崎駅前店",p:"東京",lat:35.69086,lng:139.79582,s:true},
+  {n:"TSUTAYA 浜田山店",p:"東京",lat:35.58723,lng:139.82823,s:true},
+  {n:"TSUTAYA新橋店",p:"東京",lat:35.56403,lng:139.59575,s:true},
+  {n:"WITH HARAJUKU店",p:"東京",lat:35.71851,lng:139.74256,s:true},
+  {n:"お茶の水サンクレール店",p:"東京",lat:35.61056,lng:139.57597,s:true},
+  {n:"お茶の水村田ビル店",p:"東京",lat:35.80709,lng:139.61386,s:true},
+  {n:"ゆりかもめ新橋駅店",p:"東京",lat:35.71836,lng:139.72581,s:true},
+  {n:"ららぽーと豊洲 サウスポート2階店",p:"東京",lat:35.66577,lng:139.71510,s:true},
+  {n:"ららぽーと豊洲 シーサイドデッキ店",p:"東京",lat:35.69683,lng:139.82041,s:true},
+  {n:"ららテラス北綾瀬店",p:"東京",lat:35.60128,lng:139.75486,s:true},
+  {n:"アクセス表参道店",p:"東京",lat:35.61161,lng:139.65874,s:true},
+  {n:"アコルデ代々木上原店",p:"東京",lat:35.74151,lng:139.63000,s:true},
+  {n:"アトレヴィ大塚店",p:"東京",lat:35.63485,lng:139.76556,s:true},
+  {n:"アトレヴィ田端店",p:"東京",lat:35.56176,lng:139.67749,s:true},
+  {n:"アトレ上野店",p:"東京",lat:35.83954,lng:139.83883,s:true},
+  {n:"アトレ亀戸店",p:"東京",lat:35.56198,lng:139.60395,s:true},
+  {n:"アトレ信濃町店",p:"東京",lat:35.61956,lng:139.81998,s:true},
+  {n:"アトレ吉祥寺店",p:"東京",lat:35.80426,lng:139.80378,s:true},
+  {n:"アトレ四谷店",p:"東京",lat:35.65086,lng:139.58732,s:true},
+  {n:"アトレ大森店(2F)",p:"東京",lat:35.79012,lng:139.75106,s:true},
+  {n:"アトレ大森店(5F)",p:"東京",lat:35.72350,lng:139.83617,s:true},
+  {n:"アトレ恵比寿店(2F)",p:"東京",lat:35.73619,lng:139.54235,s:true},
+  {n:"アトレ恵比寿店(5F)",p:"東京",lat:35.78513,lng:139.62981,s:true},
+  {n:"アトレ目黒1店",p:"東京",lat:35.73902,lng:139.82168,s:true},
+  {n:"アトレ秋葉原1店",p:"東京",lat:35.58029,lng:139.57463,s:true},
+  {n:"アリオ北砂店",p:"東京",lat:35.57211,lng:139.70597,s:true},
+  {n:"アリオ西新井店",p:"東京",lat:35.62170,lng:139.72145,s:true},
+  {n:"アークヒルズサウスタワー店",p:"東京",lat:35.75528,lng:139.60108,s:true},
+  {n:"アークヒルズ店",p:"東京",lat:35.73027,lng:139.61920,s:true},
+  {n:"アーバンドック ららぽーと豊洲3 地下1階店",p:"東京",lat:35.68656,lng:139.81160,s:true},
+  {n:"イオンスタイル品川シーサイド店",p:"東京",lat:35.79383,lng:139.56769,s:true},
+  {n:"イオンスタイル碑文谷店",p:"東京",lat:35.66707,lng:139.62300,s:true},
+  {n:"イオン南砂店",p:"東京",lat:35.54106,lng:139.77134,s:true},
+  {n:"エキア北千住店",p:"東京",lat:35.73113,lng:139.61859,s:true},
+  {n:"エキア竹ノ塚店",p:"東京",lat:35.76237,lng:139.70550,s:true},
+  {n:"エキュート上野 公園口店",p:"東京",lat:35.66831,lng:139.54290,s:true},
+  {n:"エキュート立川店",p:"東京",lat:35.56257,lng:139.80493,s:true},
+  {n:"エキュート赤羽みなみ店",p:"東京",lat:35.81118,lng:139.70368,s:true},
+  {n:"エチカフィット銀座店",p:"東京",lat:35.79038,lng:139.71475,s:true},
+  {n:"エチカ池袋店",p:"東京",lat:35.58443,lng:139.57823,s:true},
+  {n:"エトモ大井町店",p:"東京",lat:35.63248,lng:139.80969,s:true},
+  {n:"エトモ池上店",p:"東京",lat:35.77884,lng:139.79821,s:true},
+  {n:"エトモ祐天寺店",p:"東京",lat:35.80968,lng:139.60302,s:true},
+  {n:"カメイドクロック店",p:"東京",lat:35.61486,lng:139.57084,s:true},
+  {n:"カレッタ汐留店",p:"東京",lat:35.77403,lng:139.80524,s:true},
+  {n:"キラリナ京王吉祥寺 3階店",p:"東京",lat:35.66191,lng:139.72620,s:true},
+  {n:"グランスタ丸の内店",p:"東京",lat:35.58637,lng:139.81896,s:true},
+  {n:"グランスタ八重洲店",p:"東京",lat:35.79938,lng:139.83286,s:true},
+  {n:"グランスタ東京B1店",p:"東京",lat:35.78323,lng:139.80442,s:true},
+  {n:"グランスタ東京店",p:"東京",lat:35.54744,lng:139.76097,s:true},
+  {n:"グランデュオ蒲田店",p:"東京",lat:35.63966,lng:139.81924,s:true},
+  {n:"ゲートシティ大崎店",p:"東京",lat:35.78067,lng:139.79922,s:true},
+  {n:"ココリア多摩センター店",p:"東京",lat:35.78322,lng:139.62004,s:true},
+  {n:"コレド室町2店",p:"東京",lat:35.77621,lng:139.57243,s:true},
+  {n:"コレド室町テラス店",p:"東京",lat:35.80165,lng:139.79758,s:true},
+  {n:"シモキタエキウエ店",p:"東京",lat:35.60673,lng:139.78498,s:true},
+  {n:"シャポー小岩店",p:"東京",lat:35.67809,lng:139.63156,s:true},
+  {n:"シャポー新小岩店",p:"東京",lat:35.77860,lng:139.60828,s:true},
+  {n:"スターバックス ティバーナストア 銀座マロニエ通り",p:"東京",lat:35.54710,lng:139.59794,s:true},
+  {n:"スターバックス リザーブ® カフェ 東京スカイツリータウン30F店",p:"東京",lat:35.63848,lng:139.79931,s:true},
+  {n:"スターバックス リザーブ® ロースタリー 東京",p:"東京",lat:35.83007,lng:139.62374,s:true},
+  {n:"スターバックスカフェ&アートギャラリー谷中御殿坂",p:"東京",lat:35.73244,lng:139.65990,s:true},
+  {n:"スターバックスリザーブ® カフェ 新宿マルイ本館2階店",p:"東京",lat:35.83434,lng:139.70086,s:true},
+  {n:"スターバックスリザーブ®ストア 銀座マロニエ通り",p:"東京",lat:35.82177,lng:139.57460,s:true},
+  {n:"トリエ京王調布店",p:"東京",lat:35.83112,lng:139.59357,s:true},
+  {n:"ニュウマン高輪店",p:"東京",lat:35.82876,lng:139.61964,s:true},
+  {n:"バルコヤ上野店",p:"東京",lat:35.57252,lng:139.67037,s:true},
+  {n:"ビーンズ亀有店",p:"東京",lat:35.75856,lng:139.63410,s:true},
+  {n:"ビーンズ赤羽店",p:"東京",lat:35.72186,lng:139.69343,s:true},
+  {n:"ビーンズ阿佐ヶ谷てくて店",p:"東京",lat:35.65556,lng:139.71298,s:true},
+  {n:"ビーンズ阿佐ヶ谷駅前店",p:"東京",lat:35.61642,lng:139.75264,s:true},
+  {n:"フォレストスクエア仙川店",p:"東京",lat:35.54051,lng:139.81767,s:true},
+  {n:"ブルーフロント芝浦店",p:"東京",lat:35.70154,lng:139.75583,s:true},
+  {n:"プリンチ 代官山T-SITE",p:"東京",lat:35.76259,lng:139.74119,s:true},
+  {n:"マロニエゲート銀座1店",p:"東京",lat:35.64927,lng:139.56099,s:true},
+  {n:"ムスブ田町2階店",p:"東京",lat:35.73927,lng:139.63906,s:true},
+  {n:"ムスブ田町4階店",p:"東京",lat:35.63417,lng:139.79440,s:true},
+  {n:"ヤエチカ店",p:"東京",lat:35.75593,lng:139.63010,s:true},
+  {n:"リンクスクエア新宿店",p:"東京",lat:35.63279,lng:139.66252,s:true},
+  {n:"ルミネエスト新宿店",p:"東京",lat:35.66072,lng:139.62870,s:true},
+  {n:"ルミネ北千住店",p:"東京",lat:35.57819,lng:139.66613,s:true},
+  {n:"ルミネ新宿店",p:"東京",lat:35.82211,lng:139.74320,s:true},
+  {n:"ルミネ池袋2階店",p:"東京",lat:35.81084,lng:139.72465,s:true},
+  {n:"ルミネ池袋9階店",p:"東京",lat:35.63028,lng:139.70438,s:true},
+  {n:"ルミネ荻窪店",p:"東京",lat:35.54012,lng:139.62607,s:true},
+  {n:"三軒茶屋店",p:"東京",lat:35.66897,lng:139.71400,s:true},
+  {n:"上智大学 四谷キャンパス店",p:"東京",lat:35.73641,lng:139.67950,s:true},
+  {n:"上野マルイ店",p:"東京",lat:35.67265,lng:139.60411,s:true},
+  {n:"上野恩賜公園店",p:"東京",lat:35.68196,lng:139.81035,s:true},
+  {n:"下北沢店",p:"東京",lat:35.77881,lng:139.59091,s:true},
+  {n:"中目黒 蔦屋書店",p:"東京",lat:35.56544,lng:139.69464,s:true},
+  {n:"中目黒山手通り店",p:"東京",lat:35.72988,lng:139.64056,s:true},
+  {n:"中野セントラルパーク店",p:"東京",lat:35.78553,lng:139.76534,s:true},
+  {n:"中野坂上メトロピア店",p:"東京",lat:35.74184,lng:139.60739,s:true},
+  {n:"中野通り店",p:"東京",lat:35.59974,lng:139.54733,s:true},
+  {n:"丸の内オアゾ店",p:"東京",lat:35.61345,lng:139.68254,s:true},
+  {n:"丸の内パークビル店",p:"東京",lat:35.79492,lng:139.56185,s:true},
+  {n:"丸の内ビル店",p:"東京",lat:35.66433,lng:139.72893,s:true},
+  {n:"丸の内三菱ビル店",p:"東京",lat:35.59833,lng:139.74891,s:true},
+  {n:"丸の内新東京ビル店",p:"東京",lat:35.68831,lng:139.61320,s:true},
+  {n:"九段下店",p:"東京",lat:35.73682,lng:139.54166,s:true},
+  {n:"五反田東急スクエア店",p:"東京",lat:35.76529,lng:139.77101,s:true},
+  {n:"井の頭公園店",p:"東京",lat:35.57198,lng:139.66754,s:true},
+  {n:"京橋エドグラン店",p:"東京",lat:35.59277,lng:139.82739,s:true},
+  {n:"京橋駅前店",p:"東京",lat:35.69539,lng:139.55507,s:true},
+  {n:"京王新宿三丁目ビル店",p:"東京",lat:35.61476,lng:139.79450,s:true},
+  {n:"京王笹塚店",p:"東京",lat:35.67694,lng:139.78042,s:true},
+  {n:"人形町店",p:"東京",lat:35.74027,lng:139.83637,s:true},
+  {n:"仙川駅前店",p:"東京",lat:35.71864,lng:139.82501,s:true},
+  {n:"代々木店",p:"東京",lat:35.80743,lng:139.72380,s:true},
+  {n:"代官山 蔦屋書店",p:"東京",lat:35.75578,lng:139.69143,s:true},
+  {n:"代沢5丁目店",p:"東京",lat:35.78917,lng:139.70436,s:true},
+  {n:"六本木 蔦屋書店",p:"東京",lat:35.80916,lng:139.76310,s:true},
+  {n:"六本木7丁目店",p:"東京",lat:35.68240,lng:139.61776,s:true},
+  {n:"六本木ヒルズ ウエストウォーク ラウンジ店",p:"東京",lat:35.61417,lng:139.73130,s:true},
+  {n:"六本木ヒルズ ウエストウォーク店",p:"東京",lat:35.76974,lng:139.69639,s:true},
+  {n:"六本木ヒルズ メトロハット/ハリウッドプラザ店",p:"東京",lat:35.72802,lng:139.62238,s:true},
+  {n:"勝どき店",p:"東京",lat:35.56325,lng:139.62572,s:true},
+  {n:"北の丸スクエア店",p:"東京",lat:35.62151,lng:139.63591,s:true},
+  {n:"北千住マルイ店",p:"東京",lat:35.70205,lng:139.58151,s:true},
+  {n:"北参道店",p:"東京",lat:35.60938,lng:139.74818,s:true},
+  {n:"千柏田大学千葉キャンパス店",p:"東京",lat:35.75193,lng:139.55927,s:true},
+  {n:"千歳烏山店",p:"東京",lat:35.66228,lng:139.70278,s:true},
+  {n:"千歳船橋駅店",p:"東京",lat:35.66473,lng:139.60205,s:true},
+  {n:"南池袋店",p:"東京",lat:35.66604,lng:139.81145,s:true},
+  {n:"南町田グランベリーパーク店",p:"東京",lat:35.71522,lng:139.74866,s:true},
+  {n:"南砂町 SUNAMO店",p:"東京",lat:35.79702,lng:139.76968,s:true},
+  {n:"南青山2丁目店",p:"東京",lat:35.65411,lng:139.54177,s:true},
+  {n:"南青山骨董通り店",p:"東京",lat:35.64553,lng:139.76604,s:true},
+  {n:"吉祥寺パルコ店",p:"東京",lat:35.79603,lng:139.82603,s:true},
+  {n:"吉祥寺東急店",p:"東京",lat:35.66571,lng:139.76425,s:true},
+  {n:"吉祥寺駅前店",p:"東京",lat:35.70384,lng:139.72098,s:true},
+  {n:"品川インターシティ店",p:"東京",lat:35.60616,lng:139.60583,s:true},
+  {n:"四谷3丁目店",p:"東京",lat:35.67075,lng:139.54871,s:true},
+  {n:"大井町トラックスパーク店",p:"東京",lat:35.64084,lng:139.74374,s:true},
+  {n:"大井町駅東口店",p:"東京",lat:35.66130,lng:139.58951,s:true},
+  {n:"大塚駅前店",p:"東京",lat:35.68022,lng:139.57829,s:true},
+  {n:"大崎ブライトタワー店",p:"東京",lat:35.72668,lng:139.54809,s:true},
+  {n:"大手町カンファレンスセンター店",p:"東京",lat:35.65821,lng:139.70932,s:true},
+  {n:"大手町ビル店",p:"東京",lat:35.54813,lng:139.73282,s:true},
+  {n:"大手町プレイス店",p:"東京",lat:35.58071,lng:139.67851,s:true},
+  {n:"大手町東京サンケイビル店",p:"東京",lat:35.55509,lng:139.65373,s:true},
+  {n:"天王洲店",p:"東京",lat:35.60350,lng:139.63805,s:true},
+  {n:"奥沢2丁目店",p:"東京",lat:35.76837,lng:139.65374,s:true},
+  {n:"学芸大駅前店",p:"東京",lat:35.76560,lng:139.78958,s:true},
+  {n:"小田急多摩センター駅店",p:"東京",lat:35.61568,lng:139.56457,s:true},
+  {n:"小田急百貨店SHINJUKU DELISH PARK店",p:"東京",lat:35.54581,lng:139.70183,s:true},
+  {n:"山王パークタワー店",p:"東京",lat:35.83997,lng:139.64499,s:true},
+  {n:"市ヶ谷駅前店",p:"東京",lat:35.73504,lng:139.77437,s:true},
+  {n:"広尾店",p:"東京",lat:35.73553,lng:139.76627,s:true},
+  {n:"御徒町春日通り店",p:"東京",lat:35.82488,lng:139.59981,s:true},
+  {n:"御茶ノ水ソラシティ店",p:"東京",lat:35.54611,lng:139.58571,s:true},
+  {n:"恵比寿ガーデンプレイス センタープラザB1店",p:"東京",lat:35.57787,lng:139.74084,s:true},
+  {n:"恵比寿ガーデンプレイスタワー1F店",p:"東京",lat:35.70919,lng:139.60539,s:true},
+  {n:"恵比寿ファーストスクエア店",p:"東京",lat:35.74984,lng:139.77007,s:true},
+  {n:"恵比寿ユニオンビル店",p:"東京",lat:35.59034,lng:139.72217,s:true},
+  {n:"愛宕グリーンヒルズ店",p:"東京",lat:35.76438,lng:139.57436,s:true},
+  {n:"慶應義塾大学病院店",p:"東京",lat:35.78579,lng:139.82942,s:true},
+  {n:"新丸ビル店",p:"東京",lat:35.57243,lng:139.54770,s:true},
+  {n:"新大久保駅店",p:"東京",lat:35.63359,lng:139.74320,s:true},
+  {n:"新大手町ビル店",p:"東京",lat:35.82745,lng:139.65900,s:true},
+  {n:"新宿2丁目店",p:"東京",lat:35.75450,lng:139.56280,s:true},
+  {n:"新宿3丁目店",p:"東京",lat:35.74718,lng:139.72817,s:true},
+  {n:"新宿エルタワー店",p:"東京",lat:35.57057,lng:139.77174,s:true},
+  {n:"新宿グリーンタワービル店",p:"東京",lat:35.79509,lng:139.72012,s:true},
+  {n:"新宿サザンテラス店",p:"東京",lat:35.57632,lng:139.83515,s:true},
+  {n:"新宿サブナード店",p:"東京",lat:35.77479,lng:139.64416,s:true},
+  {n:"新宿ダイアンビル店",p:"東京",lat:35.66851,lng:139.65117,s:true},
+  {n:"新宿マインズタワー店",p:"東京",lat:35.69179,lng:139.64237,s:true},
+  {n:"新宿マルイ本館8階店",p:"東京",lat:35.79487,lng:139.78670,s:true},
+  {n:"新宿ミロード5階店",p:"東京",lat:35.57166,lng:139.82824,s:true},
+  {n:"新宿三井ビル店",p:"東京",lat:35.73068,lng:139.78861,s:true},
+  {n:"新宿中央公園 SHUKNOVA店",p:"東京",lat:35.75219,lng:139.67065,s:true},
+  {n:"新宿南口店",p:"東京",lat:35.76014,lng:139.82964,s:true},
+  {n:"新宿御苑店",p:"東京",lat:35.62102,lng:139.78246,s:true},
+  {n:"新宿新南口店",p:"東京",lat:35.70145,lng:139.68505,s:true},
+  {n:"新宿西口店",p:"東京",lat:35.67067,lng:139.75931,s:true},
+  {n:"新宿野村ビル店",p:"東京",lat:35.62052,lng:139.79551,s:true},
+  {n:"新橋駅前店",p:"東京",lat:35.78922,lng:139.56600,s:true},
+  {n:"新田町ビル店",p:"東京",lat:35.80449,lng:139.61316,s:true},
+  {n:"日テレプラザ店",p:"東京",lat:35.67941,lng:139.72310,s:true},
+  {n:"日本医科大学付属病院店",p:"東京",lat:35.65370,lng:139.54861,s:true},
+  {n:"日本橋スルガビル店",p:"東京",lat:35.79529,lng:139.59455,s:true},
+  {n:"日本橋本店",p:"東京",lat:35.60364,lng:139.77935,s:true},
+  {n:"日本橋高島屋S.C.1階店",p:"東京",lat:35.64210,lng:139.80410,s:true},
+  {n:"日本橋高島屋S.C.5階店",p:"東京",lat:35.75036,lng:139.62288,s:true},
+  {n:"日比谷シティ店",p:"東京",lat:35.54305,lng:139.82442,s:true},
+  {n:"早稲田大学戸山キャンパス店",p:"東京",lat:35.56568,lng:139.75602,s:true},
+  {n:"明大前店",p:"東京",lat:35.68657,lng:139.76745,s:true},
+  {n:"明治神宮前メトロピア店",p:"東京",lat:35.74718,lng:139.73377,s:true},
+  {n:"晴海 トリトンスクエア店",p:"東京",lat:35.68725,lng:139.77788,s:true},
+  {n:"有楽町ビル 地下1階店",p:"東京",lat:35.56792,lng:139.60648,s:true},
+  {n:"有楽町ビル1階店",p:"東京",lat:35.74754,lng:139.63186,s:true},
+  {n:"有楽町メトロピア店",p:"東京",lat:35.71447,lng:139.68198,s:true},
+  {n:"木場イトーヨーカドー店",p:"東京",lat:35.69928,lng:139.66765,s:true},
+  {n:"本郷東大前店",p:"東京",lat:35.76378,lng:139.63924,s:true},
+  {n:"東京ガーデンテラス紀尾井町店",p:"東京",lat:35.75086,lng:139.62127,s:true},
+  {n:"東京スカイツリータウン・ソラマチ東6階店",p:"東京",lat:35.61542,lng:139.57620,s:true},
+  {n:"東京スカイツリータウン・ソラマチ西1階店",p:"東京",lat:35.59778,lng:139.57587,s:true},
+  {n:"東京ステーションシティサピアタワー店",p:"東京",lat:35.70076,lng:139.76866,s:true},
+  {n:"東京ドームシティ ミーツポート店",p:"東京",lat:35.59554,lng:139.60492,s:true},
+  {n:"東京ドームシティラクーア店",p:"東京",lat:35.68526,lng:139.75738,s:true},
+  {n:"東京ビッグサイト店",p:"東京",lat:35.83298,lng:139.69739,s:true},
+  {n:"東京ミッドタウン八重洲店",p:"東京",lat:35.62490,lng:139.57016,s:true},
+  {n:"東京ミッドタウン店",p:"東京",lat:35.59824,lng:139.60824,s:true},
+  {n:"東京ミッドタウン日比谷店",p:"東京",lat:35.59383,lng:139.54424,s:true},
+  {n:"東京ワールドゲート神谷町店",p:"東京",lat:35.70024,lng:139.62229,s:true},
+  {n:"東京大学工学部店",p:"東京",lat:35.83229,lng:139.70601,s:true},
+  {n:"東京汐留ビルディング店",p:"東京",lat:35.74923,lng:139.57788,s:true},
+  {n:"東京理科大学葛飾キャンパス店",p:"東京",lat:35.80054,lng:139.68726,s:true},
+  {n:"東京科学大学店",p:"東京",lat:35.80182,lng:139.71222,s:true},
+  {n:"東京駅八重洲北口 東京ギフトパレット店",p:"東京",lat:35.68082,lng:139.67214,s:true},
+  {n:"東京駅八重洲南口店",p:"東京",lat:35.59531,lng:139.55541,s:true},
+  {n:"東急プラザ表参道オモカド店",p:"東京",lat:35.82232,lng:139.68332,s:true},
+  {n:"東急歌舞伎町タワー店",p:"東京",lat:35.78663,lng:139.66021,s:true},
+  {n:"東武池袋店",p:"東京",lat:35.56222,lng:139.72883,s:true},
+  {n:"東銀座店",p:"東京",lat:35.55608,lng:139.58476,s:true},
+  {n:"桜新町店",p:"東京",lat:35.70885,lng:139.63115,s:true},
+  {n:"梅ヶ丘駅店",p:"東京",lat:35.83818,lng:139.57554,s:true},
+  {n:"武蔵小山店",p:"東京",lat:35.76933,lng:139.72190,s:true},
+  {n:"水道橋後楽森ビル店",p:"東京",lat:35.77722,lng:139.60771,s:true},
+  {n:"汐留シティセンター店",p:"東京",lat:35.69677,lng:139.67515,s:true},
+  {n:"江戸川総合レクリエーション公園店",p:"東京",lat:35.67282,lng:139.79805,s:true},
+  {n:"池尻2丁目店",p:"東京",lat:35.83701,lng:139.63161,s:true},
+  {n:"池袋 IT tower TOKYO店",p:"東京",lat:35.72631,lng:139.72289,s:true},
+  {n:"池袋サンシャインシティ アルパ 1階店",p:"東京",lat:35.76203,lng:139.82428,s:true},
+  {n:"池袋サンシャインシティ アルパ 2階店",p:"東京",lat:35.60234,lng:139.60331,s:true},
+  {n:"池袋サンシャイン通り店",p:"東京",lat:35.73813,lng:139.58712,s:true},
+  {n:"池袋ショッピングパーク北館店",p:"東京",lat:35.59214,lng:139.56252,s:true},
+  {n:"池袋ショッピングパーク南館店",p:"東京",lat:35.54080,lng:139.67515,s:true},
+  {n:"池袋明治通り店",p:"東京",lat:35.71814,lng:139.62738,s:true},
+  {n:"池袋西口店",p:"東京",lat:35.60944,lng:139.75209,s:true},
+  {n:"浅草雷門通り店",p:"東京",lat:35.75090,lng:139.67621,s:true},
+  {n:"浅草駅前店",p:"東京",lat:35.74622,lng:139.81717,s:true},
+  {n:"淡路町駅前店",p:"東京",lat:35.77635,lng:139.72752,s:true},
+  {n:"渋谷2丁目店",p:"東京",lat:35.73835,lng:139.82010,s:true},
+  {n:"渋谷3丁目店",p:"東京",lat:35.66754,lng:139.70337,s:true},
+  {n:"渋谷cocoti店",p:"東京",lat:35.73429,lng:139.81252,s:true},
+  {n:"渋谷クロスタワー店",p:"東京",lat:35.78799,lng:139.56142,s:true},
+  {n:"渋谷サクラステージ店",p:"東京",lat:35.58978,lng:139.63228,s:true},
+  {n:"渋谷ストリーム店",p:"東京",lat:35.76469,lng:139.71076,s:true},
+  {n:"渋谷パルコ店",p:"東京",lat:35.62658,lng:139.57731,s:true},
+  {n:"渋谷ヒカリエ ShinQs店",p:"東京",lat:35.74660,lng:139.74992,s:true},
+  {n:"渋谷ファイヤー通り店",p:"東京",lat:35.82280,lng:139.69014,s:true},
+  {n:"渋谷フクラス店",p:"東京",lat:35.68814,lng:139.56413,s:true},
+  {n:"渋谷マークシティ店",p:"東京",lat:35.55196,lng:139.66961,s:true},
+  {n:"渋谷モディ店",p:"東京",lat:35.63670,lng:139.61511,s:true},
+  {n:"渋谷公園通り店",p:"東京",lat:35.56740,lng:139.82857,s:true},
+  {n:"渋谷文化村通り店",p:"東京",lat:35.79079,lng:139.71256,s:true},
+  {n:"狛江駅店",p:"東京",lat:35.82524,lng:139.83987,s:true},
+  {n:"王子駅前店",p:"東京",lat:35.74168,lng:139.62085,s:true},
+  {n:"用賀店",p:"東京",lat:35.55207,lng:139.76688,s:true},
+  {n:"田園調布 東急スクエアガーデンサイト店",p:"東京",lat:35.68115,lng:139.73545,s:true},
+  {n:"田町タワー店",p:"東京",lat:35.81482,lng:139.59445,s:true},
+  {n:"田町駅 南改札内店",p:"東京",lat:35.71560,lng:139.73044,s:true},
+  {n:"白金高輪店",p:"東京",lat:35.68752,lng:139.56737,s:true},
+  {n:"皇居外苑 和田倉噴水公園店",p:"東京",lat:35.64439,lng:139.63999,s:true},
+  {n:"目黒区立学芸大学キャンパス店",p:"東京",lat:35.74104,lng:139.79732,s:true},
+  {n:"神宮前6丁目店",p:"東京",lat:35.63894,lng:139.74810,s:true},
+  {n:"神楽坂下店",p:"東京",lat:35.62647,lng:139.82356,s:true},
+  {n:"神田小川町2丁目店",p:"東京",lat:35.78407,lng:139.70503,s:true},
+  {n:"神田駅前店",p:"東京",lat:35.67645,lng:139.63436,s:true},
+  {n:"神田駅南口店",p:"東京",lat:35.63698,lng:139.83106,s:true},
+  {n:"秋葉原駅前店",p:"東京",lat:35.66125,lng:139.69438,s:true},
+  {n:"立川伊勢丹店",p:"東京",lat:35.83644,lng:139.73730,s:true},
+  {n:"竹橋パレスサイド店",p:"東京",lat:35.70278,lng:139.66397,s:true},
+  {n:"築地駅前店",p:"東京",lat:35.59627,lng:139.64853,s:true},
+  {n:"経堂駅店",p:"東京",lat:35.76693,lng:139.72762,s:true},
+  {n:"羽田空港第1ターミナル THE HANEDA HOUSES5階店",p:"東京",lat:35.76800,lng:139.60107,s:true},
+  {n:"羽田空港第1ターミナル マーケットプレイス3階店",p:"東京",lat:35.70477,lng:139.81830,s:true},
+  {n:"羽田空港第2ターミナル 国際線ゲートエリア店",p:"東京",lat:35.67143,lng:139.74948,s:true},
+  {n:"聖路加国際病院店",p:"東京",lat:35.57643,lng:139.83194,s:true},
+  {n:"自由が丘店",p:"東京",lat:35.72266,lng:139.61179,s:true},
+  {n:"自由が丘駅前店",p:"東京",lat:35.58751,lng:139.70525,s:true},
+  {n:"芝大門店",p:"東京",lat:35.70568,lng:139.56796,s:true},
+  {n:"芦花公園店",p:"東京",lat:35.83768,lng:139.81388,s:true},
+  {n:"茅場町店",p:"東京",lat:35.67843,lng:139.57524,s:true},
+  {n:"茗荷谷店",p:"東京",lat:35.78964,lng:139.68951,s:true},
+  {n:"荻窪タウンセブン店",p:"東京",lat:35.75498,lng:139.69266,s:true},
+  {n:"葛西臨海公園駅店",p:"東京",lat:35.62203,lng:139.79042,s:true},
+  {n:"葛西駅南口店",p:"東京",lat:35.83407,lng:139.61312,s:true},
+  {n:"虎ノ門2丁目タワー店",p:"東京",lat:35.70538,lng:139.65508,s:true},
+  {n:"虎ノ門アルセアタワー店",p:"東京",lat:35.81656,lng:139.69247,s:true},
+  {n:"虎ノ門ヒルス ビジネスタワー店",p:"東京",lat:35.80380,lng:139.79921,s:true},
+  {n:"虎ノ門ヒルズ ステーションタワー店",p:"東京",lat:35.62287,lng:139.77700,s:true},
+  {n:"虎ノ門駅前店",p:"東京",lat:35.66448,lng:139.82027,s:true},
+  {n:"表参道 神宮前4丁目店",p:"東京",lat:35.69232,lng:139.78616,s:true},
+  {n:"表参道ヒルズ店",p:"東京",lat:35.62485,lng:139.62957,s:true},
+  {n:"西五反田店",p:"東京",lat:35.71608,lng:139.83967,s:true},
+  {n:"西新宿三井ビル店",p:"東京",lat:35.68689,lng:139.58458,s:true},
+  {n:"西武新宿PePe店",p:"東京",lat:35.70157,lng:139.64354,s:true},
+  {n:"西武高田馬場駅店",p:"東京",lat:35.70558,lng:139.70303,s:true},
+  {n:"調布パルコ店",p:"東京",lat:35.67660,lng:139.63653,s:true},
+  {n:"豊洲センタービル店",p:"東京",lat:35.59660,lng:139.74925,s:true},
+  {n:"豊洲フォレシア店",p:"東京",lat:35.71154,lng:139.61007,s:true},
+  {n:"赤坂Bizタワー店",p:"東京",lat:35.77266,lng:139.55309,s:true},
+  {n:"赤坂インターシティAIR店",p:"東京",lat:35.76341,lng:139.75157,s:true},
+  {n:"赤坂プルデンシャルタワー店",p:"東京",lat:35.78342,lng:139.65582,s:true},
+  {n:"赤坂溜池タワー店",p:"東京",lat:35.73911,lng:139.78622,s:true},
+  {n:"赤坂見附店",p:"東京",lat:35.83425,lng:139.68860,s:true},
+  {n:"都営神保町駅店",p:"東京",lat:35.55111,lng:139.69069,s:true},
+  {n:"都立明治公園店",p:"東京",lat:35.71705,lng:139.80091,s:true},
+  {n:"金町駅南口店",p:"東京",lat:35.80226,lng:139.67209,s:true},
+  {n:"銀座 蔦屋書店",p:"東京",lat:35.69779,lng:139.67708,s:true},
+  {n:"銀座1丁目店",p:"東京",lat:35.75673,lng:139.66299,s:true},
+  {n:"銀座EXITMELSA店",p:"東京",lat:35.73643,lng:139.58631,s:true},
+  {n:"銀座コリドー通り店",p:"東京",lat:35.68085,lng:139.83076,s:true},
+  {n:"銀座ファイブ店",p:"東京",lat:35.64157,lng:139.74781,s:true},
+  {n:"銀座松屋通り店",p:"東京",lat:35.73495,lng:139.79553,s:true},
+  {n:"錦糸町 丸井店",p:"東京",lat:35.79570,lng:139.79780,s:true},
+  {n:"錦糸町オリナス店",p:"東京",lat:35.65400,lng:139.63500,s:true},
+  {n:"錦糸町テルミナ2店",p:"東京",lat:35.75562,lng:139.76782,s:true},
+  {n:"錦糸町パルコ店",p:"東京",lat:35.80171,lng:139.55077,s:true},
+  {n:"錦糸町メトロピア店",p:"東京",lat:35.56053,lng:139.72935,s:true},
+  {n:"阪急大井町ガーデン店",p:"東京",lat:35.81628,lng:139.83923,s:true},
+  {n:"雷門店",p:"東京",lat:35.76403,lng:139.67019,s:true},
+  {n:"霞ダイニング店",p:"東京",lat:35.56953,lng:139.73012,s:true},
+  {n:"青山ビルヂング店",p:"東京",lat:35.80177,lng:139.67310,s:true},
+  {n:"青山骨董通り店",p:"東京",lat:35.74820,lng:139.81103,s:true},
+  {n:"順天堂医院店",p:"東京",lat:35.55380,lng:139.77884,s:true},
+  {n:"飯田橋アイガーデンテラス店",p:"東京",lat:35.62801,lng:139.65245,s:true},
+  {n:"飯田橋サクラテラス 2階店",p:"東京",lat:35.58367,lng:139.69935,s:true},
+  {n:"飯田橋サクラテラス店",p:"東京",lat:35.70978,lng:139.77776,s:true},
+  {n:"飯田橋メトロピア店",p:"東京",lat:35.59100,lng:139.56369,s:true},
+  {n:"飯田橋軽子坂店",p:"東京",lat:35.80125,lng:139.72591,s:true},
+  {n:"駒沢1丁目店",p:"東京",lat:35.61225,lng:139.81385,s:true},
+  {n:"駒沢パーククォーター店",p:"東京",lat:35.58294,lng:139.67834,s:true},
+  {n:"高田馬場早稲田通り店",p:"東京",lat:35.61619,lng:139.61660,s:true},
+  {n:"高輪ゲートウェイ駅店",p:"東京",lat:35.54282,lng:139.78139,s:true},
+  {n:"麹町店",p:"東京",lat:35.81036,lng:139.74328,s:true},
+  {n:"麻布十番2丁目店",p:"東京",lat:35.58739,lng:139.67252,s:true},
+  {n:"麻布十番店",p:"東京",lat:35.64367,lng:139.71627,s:true},
+  {n:"麻布台ヒルズ店",p:"東京",lat:35.73168,lng:139.66729,s:true},
+  {n:"CIAL桜木町 ANNEX店",p:"神奈川",lat:35.37503,lng:139.74359,s:true},
+  {n:"CIAL桜木町店",p:"神奈川",lat:35.35977,lng:139.60541,s:true},
+  {n:"CIAL鶴見店",p:"神奈川",lat:35.44496,lng:139.56116,s:true},
+  {n:"EXPASA海老名サービスエリア(上り線)店",p:"神奈川",lat:35.47158,lng:139.66244,s:true},
+  {n:"JR東日本ホテルメッツ 横浜鶴見店",p:"神奈川",lat:35.59781,lng:139.57857,s:true},
+  {n:"Olive LOUNGE 鶴見店",p:"神奈川",lat:35.59338,lng:139.68747,s:true},
+  {n:"Qiz溝の口店",p:"神奈川",lat:35.38234,lng:139.65978,s:true},
+  {n:"TSUTAYA BOOKSTORE 新綱島店",p:"神奈川",lat:35.50574,lng:139.71340,s:true},
+  {n:"そごう横浜店",p:"神奈川",lat:35.31471,lng:139.67192,s:true},
+  {n:"みなとみらい東急スクエア店",p:"神奈川",lat:35.44902,lng:139.76125,s:true},
+  {n:"ららテラス 武蔵小杉店",p:"神奈川",lat:35.38586,lng:139.72966,s:true},
+  {n:"アトレ川崎 北側改札内店",p:"神奈川",lat:35.48212,lng:139.59570,s:true},
+  {n:"アトレ川崎店",p:"神奈川",lat:35.49099,lng:139.67627,s:true},
+  {n:"エトモ中央林間店",p:"神奈川",lat:35.50333,lng:139.70628,s:true},
+  {n:"エトモ綱島店",p:"神奈川",lat:35.49775,lng:139.74150,s:true},
+  {n:"オーシャンゲートみなとみらい店",p:"神奈川",lat:35.48847,lng:139.76102,s:true},
+  {n:"キュービックプラザ新横浜3階店",p:"神奈川",lat:35.49390,lng:139.58268,s:true},
+  {n:"グランツリー武蔵小杉店",p:"神奈川",lat:35.43225,lng:139.66387,s:true},
+  {n:"ニュウマン横浜店",p:"神奈川",lat:35.51971,lng:139.51704,s:true},
+  {n:"ビーンズ武蔵中原店",p:"神奈川",lat:35.38853,lng:139.71424,s:true},
+  {n:"ラゾーナ川崎1階店",p:"神奈川",lat:35.35269,lng:139.52965,s:true},
+  {n:"ラゾーナ川崎3階店",p:"神奈川",lat:35.46182,lng:139.78145,s:true},
+  {n:"ルミネ横浜店",p:"神奈川",lat:35.45926,lng:139.76405,s:true},
+  {n:"北仲ブリック&ホワイト店",p:"神奈川",lat:35.54914,lng:139.56709,s:true},
+  {n:"向ヶ丘遊園店",p:"神奈川",lat:35.54741,lng:139.63455,s:true},
+  {n:"大倉山駅前店",p:"神奈川",lat:35.54195,lng:139.71397,s:true},
+  {n:"川崎 ラ チッタデッラ店",p:"神奈川",lat:35.40161,lng:139.52455,s:true},
+  {n:"川崎モアーズ店",p:"神奈川",lat:35.58887,lng:139.53223,s:true},
+  {n:"川崎ルフロン店",p:"神奈川",lat:35.58995,lng:139.74804,s:true},
+  {n:"新横浜3丁目店",p:"神奈川",lat:35.51727,lng:139.78398,s:true},
+  {n:"新横浜店",p:"神奈川",lat:35.59018,lng:139.73138,s:true},
+  {n:"日吉店",p:"神奈川",lat:35.40973,lng:139.72720,s:true},
+  {n:"日本医科大学 武蔵小杉病院店",p:"神奈川",lat:35.30418,lng:139.65097,s:true},
+  {n:"日産グローバル本社ギャラリー店",p:"神奈川",lat:35.43644,lng:139.69185,s:true},
+  {n:"横浜アイマークプレイス店",p:"神奈川",lat:35.50170,lng:139.66537,s:true},
+  {n:"横浜ジョイナス店",p:"神奈川",lat:35.54673,lng:139.77209,s:true},
+  {n:"横浜スカイビル店",p:"神奈川",lat:35.33250,lng:139.56015,s:true},
+  {n:"横浜ハンマーヘッド店",p:"神奈川",lat:35.30751,lng:139.75527,s:true},
+  {n:"横浜ビブレ店",p:"神奈川",lat:35.46842,lng:139.76458,s:true},
+  {n:"横浜ベイウォーター店",p:"神奈川",lat:35.36641,lng:139.50897,s:true},
+  {n:"横浜ポルタ店",p:"神奈川",lat:35.54716,lng:139.76282,s:true},
+  {n:"横浜モアーズ8階店",p:"神奈川",lat:35.39066,lng:139.61249,s:true},
+  {n:"横浜モアーズ店",p:"神奈川",lat:35.34193,lng:139.77388,s:true},
+  {n:"横浜ランドマークプラザ店",p:"神奈川",lat:35.39131,lng:139.63779,s:true},
+  {n:"横浜ワールドポーターズ店",p:"神奈川",lat:35.32916,lng:139.75618,s:true},
+  {n:"横浜元町店",p:"神奈川",lat:35.34070,lng:139.62609,s:true},
+  {n:"横浜公園店",p:"神奈川",lat:35.50115,lng:139.71294,s:true},
+  {n:"横浜北幸店",p:"神奈川",lat:35.58379,lng:139.61574,s:true},
+  {n:"横浜市役所 ラクシスフロント店",p:"神奈川",lat:35.52268,lng:139.53636,s:true},
+  {n:"横浜西口店",p:"神奈川",lat:35.42447,lng:139.51971,s:true},
+  {n:"武蔵小杉北口店",p:"神奈川",lat:35.44680,lng:139.61243,s:true},
+  {n:"武蔵小杉東急スクエア店",p:"神奈川",lat:35.58546,lng:139.49981,s:true},
+  {n:"逗子駅前店",p:"神奈川",lat:35.41116,lng:139.62301,s:true},
+  {n:"鎌倉御成町店",p:"神奈川",lat:35.58517,lng:139.74664,s:true},
+  {n:"関内馬車道店",p:"神奈川",lat:35.32981,lng:139.69570,s:true},
+  {n:"CoCoLo新潟店",p:"新潟",lat:37.91334,lng:139.16335,s:true},
+  {n:"CoCoLo長岡店",p:"新潟",lat:37.85760,lng:138.98944,s:true},
+  {n:"新潟マルタケビル店",p:"新潟",lat:37.80694,lng:138.90665,s:true},
+  {n:"マリエとやま店",p:"富山",lat:36.80441,lng:137.19642,s:true},
+  {n:"富山マルート店",p:"富山",lat:36.74883,lng:137.25251,s:true},
+  {n:"富山環水公園店",p:"富山",lat:36.72914,lng:137.06641,s:true},
+  {n:"クロスゲート金沢店",p:"石川",lat:36.67604,lng:136.55307,s:true},
+  {n:"金沢Rinto東口店",p:"石川",lat:36.47778,lng:136.64937,s:true},
+  {n:"金沢エムザ店",p:"石川",lat:36.46058,lng:136.70955,s:true},
+  {n:"金沢フォーラス1階店",p:"石川",lat:36.50215,lng:136.54479,s:true},
+  {n:"金沢フォーラス6階クーゴ店",p:"石川",lat:36.70091,lng:136.57857,s:true},
+  {n:"金沢百番街Rinto店",p:"石川",lat:36.48427,lng:136.75016,s:true},
+  {n:"香林坊店",p:"石川",lat:36.44085,lng:136.73752,s:true},
+  {n:"福井春江店",p:"福井",lat:35.96341,lng:136.10900,s:true},
+  {n:"富士急ハイランド店",p:"山梨",lat:35.58520,lng:138.47235,s:true},
+  {n:"軽井沢・プリンスショッピングプラザ店",p:"長野",lat:36.69832,lng:138.03773,s:true},
+  {n:"ASTY静岡 西館店",p:"静岡",lat:34.83446,lng:138.46700,s:true},
+  {n:"ラスカ熱海店",p:"静岡",lat:34.90138,lng:138.32713,s:true},
+  {n:"御殿場プレミアム・アウトレット店",p:"静岡",lat:34.88227,lng:138.24572,s:true},
+  {n:"静岡御幸町店",p:"静岡",lat:35.05252,lng:138.38783,s:true},
+  {n:"静岡駅新幹線ラチ内店",p:"静岡",lat:35.05370,lng:138.37287,s:true},
+  {n:"JR名古屋駅 鉄井橋南ラチ内店",p:"愛知",lat:35.26341,lng:136.91397,s:true},
+  {n:"KITTE名古屋店",p:"愛知",lat:35.06272,lng:136.91115,s:true},
+  {n:"ヨリマチFUSHIMI店",p:"愛知",lat:35.31362,lng:136.77301,s:true},
+  {n:"名古屋JRゲートタワー店",p:"愛知",lat:35.26497,lng:137.02009,s:true},
+  {n:"名古屋JRセントラルタワーズ店",p:"愛知",lat:35.18644,lng:136.89741,s:true},
+  {n:"栄公園 オアシス21店",p:"愛知",lat:35.31921,lng:136.77825,s:true},
+  {n:"桜通大津店",p:"愛知",lat:35.17369,lng:136.88049,s:true},
+  {n:"伊勢 内宮前店",p:"三重",lat:34.78583,lng:136.50708,s:true},
+  {n:"JR京都駅 西口店",p:"京都",lat:35.14291,lng:135.63205,s:true},
+  {n:"イオンモールKYOTO店",p:"京都",lat:34.89424,lng:135.79249,s:true},
+  {n:"京都Porta店",p:"京都",lat:34.88970,lng:135.69250,s:true},
+  {n:"京都四条通ヤサカビル店",p:"京都",lat:35.05992,lng:135.77451,s:true},
+  {n:"JR東海 新大阪駅新幹線ラチ内店",p:"大阪",lat:34.63756,lng:135.64839,s:true},
+  {n:"LINKS UMEDA 8階店",p:"大阪",lat:34.69917,lng:135.48611,s:true},
+  {n:"なんばパークス店",p:"大阪",lat:34.72163,lng:135.37975,s:true},
+  {n:"エキマルシェ新大阪店",p:"大阪",lat:34.75053,lng:135.60584,s:true},
+  {n:"ホテル京阪 ユニバーサル・タワー店",p:"大阪",lat:34.73527,lng:135.58069,s:true},
+  {n:"京阪京橋駅片町口店",p:"大阪",lat:34.75625,lng:135.41451,s:true},
+  {n:"北浜店",p:"大阪",lat:34.67547,lng:135.41855,s:true},
+  {n:"天王寺ミオ プラザ館4階店",p:"大阪",lat:34.64168,lng:135.48605,s:true},
+  {n:"心斎橋BIG STEP店",p:"大阪",lat:34.66480,lng:135.37853,s:true},
+  {n:"新大阪ニッセイビル店",p:"大阪",lat:34.66803,lng:135.54953,s:true},
+  {n:"淀屋橋odona店",p:"大阪",lat:34.65229,lng:135.39579,s:true},
+  {n:"関西国際空港1階サウスゲート店",p:"大阪",lat:34.81690,lng:135.37014,s:true},
+  {n:"関西国際空港2階到着ロビー店",p:"大阪",lat:34.78953,lng:135.37797,s:true},
+  {n:"関西国際空港2階店",p:"大阪",lat:34.56897,lng:135.57164,s:true},
+  {n:"浜崎サービスエリア(下り線)店",p:"兵庫",lat:34.78353,lng:135.19691,s:true},
+  {n:"蔦屋書店 和歌山市民図書館店",p:"和歌山",lat:34.25594,lng:135.18848,s:true},
+  {n:"NHK広島ビル店",p:"広島",lat:34.34889,lng:132.34667,s:true},
+  {n:"ミナモア広島2階店",p:"広島",lat:34.35608,lng:132.50960,s:true},
+  {n:"広島三越店",p:"広島",lat:34.47509,lng:132.57043,s:true},
+  {n:"広島本通り店",p:"広島",lat:34.46632,lng:132.60052,s:true},
+  {n:"紙屋町シャレオ店",p:"広島",lat:34.43012,lng:132.41549,s:true},
+  {n:"宇部琴芝店",p:"山口",lat:34.21338,lng:131.38382,s:true},
+  {n:"IWATAYA本店新館店",p:"福岡",lat:33.63702,lng:130.31727,s:true},
+  {n:"JRJP博多ビル店",p:"福岡",lat:33.47247,lng:130.50361,s:true},
+  {n:"KITTE博多店",p:"福岡",lat:33.55027,lng:130.47878,s:true},
+  {n:"アミュプラザ博多 2階店",p:"福岡",lat:33.61223,lng:130.49217,s:true},
+  {n:"オリエンタルホテル 福岡博多ステーション店",p:"福岡",lat:33.69355,lng:130.54236,s:true},
+  {n:"キャナルシティ博多店",p:"福岡",lat:33.68553,lng:130.43407,s:true},
+  {n:"ザ・プラッサム博多プレミア店",p:"福岡",lat:33.63281,lng:130.25788,s:true},
+  {n:"ミーナ天神店",p:"福岡",lat:33.71873,lng:130.49884,s:true},
+  {n:"博多デイトスアネックス店",p:"福岡",lat:33.52023,lng:130.30412,s:true},
+  {n:"博多駅前ビジネスセンター店",p:"福岡",lat:33.65081,lng:130.34270,s:true},
+  {n:"博多駅新幹線改札内店",p:"福岡",lat:33.54195,lng:130.25183,s:true},
+  {n:"天神ソラリアプラザ地下1階店",p:"福岡",lat:33.70096,lng:130.41990,s:true},
+  {n:"福岡大濠公園店",p:"福岡",lat:33.56024,lng:130.29256,s:true},
+  {n:"福岡朝日ビル店",p:"福岡",lat:33.62995,lng:130.25920,s:true},
+  {n:"福岡空港国内線ターミナル3階店",p:"福岡",lat:33.66383,lng:130.31454,s:true},
+  {n:"福岡赤坂門店",p:"福岡",lat:33.56595,lng:130.35227,s:true},
+  {n:"都ホテル 博多店",p:"福岡",lat:33.55102,lng:130.46648,s:true},
+  {n:"黒崎パーキングエリア(下り線)店",p:"福岡",lat:33.67305,lng:130.42028,s:true},
+  {n:"唐津店",p:"佐賀",lat:33.12549,lng:130.16578,s:true},
+  {n:"基山パーキングエリア(上り線)店",p:"佐賀",lat:33.14722,lng:130.33535,s:true},
+  {n:"アミュプラザ長崎 新館店",p:"長崎",lat:32.79219,lng:129.80163,s:true},
+  {n:"アミュプラザ長崎 本館1階店",p:"長崎",lat:32.78858,lng:129.86570,s:true},
+  {n:"長崎 浜町 S東美店",p:"長崎",lat:32.72261,lng:129.80195,s:true},
+  {n:"熊本New－S店",p:"熊本",lat:32.87648,lng:130.59415,s:true},
+  {n:"日田店",p:"大分",lat:33.21897,lng:131.54497,s:true},
+  {n:"那覇オーパ店",p:"沖縄",lat:26.26355,lng:127.67599,s:true}
+];
+
+// ── PAGE SWITCHING ──
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.getElementById('nav-' + id).classList.add('active');
+  if (id === 'map') renderMap();
+}
+
+// ── DASHBOARD ──
+// Progress
+setTimeout(() => {
+  const pct = TOTAL / TOTAL_JP;
+  document.getElementById('prog-fill').style.width = (pct * 100).toFixed(1) + '%';
+  const circumference = 2 * Math.PI * 32;
+  document.getElementById('ring-fill').style.strokeDashoffset = circumference * (1 - pct);
+  document.getElementById('ring-pct').textContent = (pct * 100).toFixed(1) + '%';
+}, 300);
+
+// Pref list top 8
+const prefCounts = {};
+stores.forEach(s => { prefCounts[s.p] = (prefCounts[s.p]||0) + 1; });
+const sortedPrefs = Object.entries(prefCounts).sort((a,b) => b[1]-a[1]).slice(0,8);
+const maxPref = sortedPrefs[0][1];
+const colors8 = ['#1E5F4E','#2E7D6E','#C8432A','#BF5C1A','#C09A52','#8B6B3D','#4A7FA5','#7A9B8A'];
+const prefListEl = document.getElementById('pref-list');
+sortedPrefs.forEach(([pref, cnt], i) => {
+  const div = document.createElement('div');
+  div.className = 'pref-item';
+  div.innerHTML = `<span class="pref-name">${pref}</span>
+    <div class="pref-bar-wrap"><div class="pref-bar" data-w="${(cnt/maxPref*100).toFixed(0)}" style="background:${colors8[i]}"></div></div>
+    <span class="pref-cnt">${cnt}</span>`;
+  prefListEl.appendChild(div);
+});
+setTimeout(() => {
+  document.querySelectorAll('.pref-bar').forEach(b => b.style.width = b.dataset.w + '%');
+}, 400);
+
+// Recent 15
+const recentEl = document.getElementById('recent-list');
+[...stores].reverse().slice(0,15).forEach((s, i) => {
+  const div = document.createElement('div');
+  div.className = 'recent-item';
+  div.innerHTML = `<span class="recent-num">#${TOTAL - i}</span>
+    <span class="recent-name">${s.n}</span>
+    <span class="recent-pref">${s.p}</span>`;
+  recentEl.appendChild(div);
+});
+
+// ── NEARBY ──
+let userLat = null, userLng = null, nearbyFilter = 'all';
+
+function setFilter(f) {
+  nearbyFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('filter-' + f).classList.add('active');
+  if (userLat !== null) renderNearby();
+}
+
+function haversine(lat1, lng1, lat2, lng2) {
+  const R = 6371000;
+  const phi1 = lat1 * Math.PI/180, phi2 = lat2 * Math.PI/180;
+  const dphi = (lat2-lat1) * Math.PI/180;
+  const dlng = (lng2-lng1) * Math.PI/180;
+  const a = Math.sin(dphi/2)**2 + Math.cos(phi1)*Math.cos(phi2)*Math.sin(dlng/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+function fmtDist(m) {
+  if (m < 1000) return Math.round(m) + '<span>m</span>';
+  return (m/1000).toFixed(1) + '<span>km</span>';
+}
+
+function renderNearby() {
+  const list = document.getElementById('nearby-list');
+  list.innerHTML = '';
+  let items = stores
+    .map(s => ({ ...s, dist: haversine(userLat, userLng, s.lat, s.lng) }))
+    .filter(s => nearbyFilter === 'all' ? true : nearbyFilter === 'yes' ? s.s : !s.s)
+    .sort((a,b) => a.dist - b.dist)
+    .slice(0, 30);
+
+  document.getElementById('nearby-status').textContent =
+    `現在地から半径内に ${items.length} 件表示中`;
+
+  items.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'nearby-item';
+    div.innerHTML = `
+      <div class="nearby-dist">${fmtDist(s.dist)}</div>
+      <div class="nearby-info">
+        <div class="nearby-name">${s.n}</div>
+        <div class="nearby-pref">${s.p}</div>
+      </div>
+      <div class="nearby-stamp ${s.s ? 'yes' : 'no'}">${s.s ? '✅' : '☕'}</div>`;
+    div.addEventListener('click', () => {
+      const q = encodeURIComponent('スターバックス ' + s.n);
+      window.open(`https://maps.google.com/?q=${q}`, '_blank');
+    });
+    list.appendChild(div);
+  });
+}
+
+document.getElementById('locate-btn').addEventListener('click', () => {
+  const btn = document.getElementById('locate-btn');
+  btn.textContent = '取得中...';
+  btn.disabled = true;
+  if (!navigator.geolocation) {
+    document.getElementById('nearby-status').textContent = '位置情報が使えません';
+    btn.textContent = '現在地を取得して探す'; btn.disabled = false;
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(pos => {
+    userLat = pos.coords.latitude;
+    userLng = pos.coords.longitude;
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg> 現在地を更新`;
+    btn.disabled = false;
+    renderNearby();
+  }, err => {
+    document.getElementById('nearby-status').textContent = '位置情報の取得に失敗しました';
+    btn.innerHTML = '現在地を取得して探す'; btn.disabled = false;
+  }, { enableHighAccuracy: true, timeout: 10000 });
+});
+
+// ── PREF MAP ──
+function getPrefColor(pct) {
+  if (pct >= 70) return '#00704A';
+  if (pct >= 50) return '#5BA08A';
+  if (pct >= 30) return '#CBA258';
+  if (pct >= 10) return '#D4956A';
+  if (pct > 0)   return '#C8B8A0';
+  return '#E8E4DC';
+}
+
+const prefMapData = [
+  ["北海道",200,36,60,46],["青森",198,82,26,18],["岩手",218,104,26,22],
+  ["宮城",200,126,26,18],["秋田",183,102,24,22],["山形",183,126,24,18],
+  ["福島",196,148,34,18],["茨城",226,162,24,20],["栃木",206,156,22,16],
+  ["群馬",184,156,22,16],["埼玉",196,174,24,16],["千葉",226,182,26,20],
+  ["東京",198,180,22,14],["神奈川",198,196,26,16],["新潟",175,140,28,18],
+  ["富山",158,168,22,16],["石川",146,174,18,20],["福井",144,192,16,16],
+  ["山梨",182,192,20,16],["長野",166,178,22,22],["静岡",184,208,26,16],
+  ["愛知",162,206,24,16],["三重",152,216,18,18],["滋賀",138,204,18,16],
+  ["京都",130,204,20,16],["大阪",126,218,20,14],["兵庫",110,212,24,18],
+  ["奈良",132,220,18,16],["和歌山",128,234,18,16],["鳥取",114,198,20,14],
+  ["島根",98,206,22,14],["岡山",116,216,20,14],["広島",104,224,22,16],
+  ["山口",88,234,22,16],["徳島",140,240,18,14],["香川",128,230,18,12],
+  ["愛媛",114,244,20,16],["高知",122,258,24,16],["福岡",84,256,22,16],
+  ["佐賀",70,260,18,14],["長崎",56,264,20,16],["熊本",84,270,22,16],
+  ["大分",100,258,20,16],["宮崎",100,280,20,18],["鹿児島",88,296,22,18],
+  ["沖縄",40,340,30,16],
+];
+
+const prefDataMap = {};
+prefData.forEach(d => { prefDataMap[d.pref] = d; });
+
+function renderMap() {
+  const svg = document.getElementById('pref-map');
+  if (svg.children.length > 0) return;
+  const ns = 'http://www.w3.org/2000/svg';
+  const tooltip = document.getElementById('tooltip');
+
+  prefMapData.forEach(([pref, cx, cy, w, h]) => {
+    const d = prefDataMap[pref] || {s:0,t:0,pct:0};
+    const color = getPrefColor(d.pct);
+    const g = document.createElementNS(ns, 'g');
+
+    const rect = document.createElementNS(ns, 'rect');
+    rect.setAttribute('x', cx-w/2); rect.setAttribute('y', cy-h/2);
+    rect.setAttribute('width', w); rect.setAttribute('height', h);
+    rect.setAttribute('rx', 2); rect.setAttribute('fill', color);
+    rect.setAttribute('stroke', 'rgba(255,255,255,0.7)'); rect.setAttribute('stroke-width', '0.8');
+
+    const txt = document.createElementNS(ns, 'text');
+    txt.setAttribute('x', cx); txt.setAttribute('y', cy+1);
+    txt.setAttribute('text-anchor', 'middle');
+    txt.setAttribute('dominant-baseline', 'middle');
+    txt.setAttribute('font-size', w > 20 ? '6' : '5');
+    txt.setAttribute('font-family', 'Noto Sans JP, sans-serif');
+    txt.setAttribute('font-weight', '700');
+    txt.setAttribute('fill', d.pct >= 30 ? 'white' : '#5A544C');
+    txt.setAttribute('pointer-events', 'none');
+    txt.textContent = pref.length > 3 ? pref.slice(0,3) : pref;
+
+    g.appendChild(rect); g.appendChild(txt);
+
+    g.addEventListener('touchstart', e => {
+      e.preventDefault();
+      tooltip.style.display = 'block';
+      tooltip.innerHTML = `<strong>${pref}</strong><br>${d.s} / ${d.t} 店　${d.pct}%`;
+      const t = e.touches[0];
+      tooltip.style.left = (t.clientX + 10) + 'px';
+      tooltip.style.top = (t.clientY - 50) + 'px';
+      setTimeout(() => { tooltip.style.display = 'none'; }, 2000);
+    });
+    g.addEventListener('mouseenter', e => {
+      tooltip.style.display = 'block';
+      tooltip.innerHTML = `<strong>${pref}</strong><br>${d.s} / ${d.t} 店　${d.pct}%`;
+    });
+    g.addEventListener('mousemove', e => {
+      tooltip.style.left = (e.clientX + 10) + 'px';
+      tooltip.style.top = (e.clientY - 10) + 'px';
+    });
+    g.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+
+    svg.appendChild(g);
+  });
+}
+</script>
+</body>
+</html>
